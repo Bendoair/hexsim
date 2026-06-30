@@ -14,6 +14,9 @@ export interface SimConfig {
   // --- Capitals -----------------------------------------------------------
   /** Maximum number of capitals/kingdoms a user may place (Open Q#3: capped). */
   maxCapitals: number;       // suggested 8,    range 1–24
+  /** Points a capital tile can never drop below (floor applied each tick).
+   * Keeps a capital from being starved/drained to zero by hostility. */
+  capitalMinPoints: number;  // suggested 12,   range 0–100
 
   // --- World generation (terrain layout) ----------------------------------
   world: {
@@ -70,6 +73,7 @@ export interface SimConfig {
 export const DEFAULT_CONFIG: SimConfig = {
   seed: 1,
   maxCapitals: 8,
+  capitalMinPoints: 12,
   world: {
     seaFraction: 0.5,
     oceanSeeds: 6,

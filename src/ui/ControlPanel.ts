@@ -106,6 +106,14 @@ export class ControlPanel {
       get: () => config.maxCapitals,
       set: (v) => (config.maxCapitals = v),
     });
+    this.addSlider(callbacks, {
+      label: "capital min points",
+      min: 0,
+      max: 100,
+      step: 1,
+      get: () => config.capitalMinPoints,
+      set: (v) => (config.capitalMinPoints = v),
+    });
 
     this.addHeading("Accumulation");
     this.addSlider(callbacks, {

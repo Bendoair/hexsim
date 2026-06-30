@@ -19,6 +19,7 @@ import { accumulationRule } from "./sim/rules/accumulation";
 import { hostilityRule } from "./sim/rules/hostility";
 import { createSpreadRule } from "./sim/rules/spread";
 import { mutationRule } from "./sim/rules/mutation";
+import { capitalFloorRule } from "./sim/rules/capitalFloor";
 import { HUD, type ViewMode } from "./ui/HUD";
 import { ControlPanel } from "./ui/ControlPanel";
 import { DEFAULT_CONFIG } from "./config/SimConfig";
@@ -42,7 +43,7 @@ let view: ViewMode = "owners";
 let bordersVisible = false;
 
 function buildRules() {
-  return [accumulationRule, hostilityRule, createSpreadRule(), mutationRule];
+  return [accumulationRule, hostilityRule, createSpreadRule(), mutationRule, capitalFloorRule];
 }
 
 function recolor(): void {
