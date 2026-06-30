@@ -1,0 +1,25 @@
+---
+alwaysApply: true
+---
+# Project: Hex-Globe Kingdom Simulation
+
+A tweakable Babylon.js sim of kingdoms spreading on a hex-tiled globe. Hobby
+project: optimize for clarity, expandability, fast rule iteration — not prod.
+
+## Before doing anything
+Read `docs/PROJECT.md` (source of truth) and `docs/TASKS.md` (ordered checklist).
+Work the tasks in order; don't skip ahead.
+
+## Non-negotiables
+- TypeScript strict. No `any`.
+- Sim is **double-buffered**: read previous state, write next, swap. Never mutate
+  the buffer you're reading from mid-tick.
+- Discrete fixed ticks. Render loop is separate from sim ticks.
+- **`core/` and `sim/` must NOT import Babylon.** Rendering is a read-only view.
+- Terrain/features are **composition** on `Tile`, never subclasses of `Tile`.
+- Every new tunable goes in `SimConfig` AND gets a UI slider.
+
+## When unsure
+PROJECT.md §3 lists Open Questions that are deliberately undecided. If a task
+hits one, **stop and ask the human** — do not silently pick. State which rules
+you applied in your reply.

@@ -1,0 +1,29 @@
+---
+description: Babylon.js render layer conventions
+globs: src/render/**/*.ts
+---
+# Render layer (Babylon.js)
+
+This is the **only** place Babylon.js may be imported. It renders sim state; it
+never owns sim state.
+
+## Rules
+- Render is a **read-only view**. It reads `World`/sim state and updates the mesh.
+  It must not contain game rules or mutate sim state.
+- The hex-globe is a **Goldberg polyhedron** via `CreateGoldberg`. It always has
+  exactly 12 pentagons — this is mathematically unavoidable, not a bug.
+- Orient the globe so two pentagons sit at the poles; the render layer exposes
+  which faces are pole caps so `core` can tag `isPoleCap`. Pole caps are still
+  drawn but excluded from simulation.
+- Per-tile color: use the Goldberg per-face color API / a color buffer keyed by
+  face index. Maintain one authoritative `faceIndex ↔ tileId` map; everything
+  else derives from it.
+- Picking: pointer pick → faceIndex → tileId via that map. Don't hand-roll
+  raycasting if Babylon's pick gives the face.
+- Keep camera (ArcRotateCamera), lights, and engine setup in `SceneSetup`.
+
+## Performance
+- Tiles share one mesh; do **not** create one mesh per hex. Color via the face
+  buffer, not per-tile materials.
+- The render loop runs at display rate; it reads the latest committed sim buffer.
+  Sim ticks advance on their own cadence (or on HUD step). Don't couple them.

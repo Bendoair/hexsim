@@ -1,0 +1,33 @@
+---
+description: How to build and reason about the Goldberg hex-globe geometry, neighbor adjacency, and the 12 pentagons. Pull this in when working on GlobeMesh, HexGrid, picking, or anything geometry-related.
+---
+# Goldberg hex-globe geometry
+
+## The shape
+You cannot tile a sphere with only hexagons. The Goldberg polyhedron (dual of a
+geodesic icosahedron) tiles it with hexagons **plus exactly 12 pentagons**,
+always, at the 12 icosahedral vertices. Babylon's `MeshBuilder.CreateGoldberg`
+builds this directly and gives per-face data + per-face color/texture helpers.
+
+- Parameters `m, n` control tessellation (tile count). Start small (a few hundred
+  tiles) for fast iteration; raise later.
+- Goldberg meshes expose face metadata that distinguishes pentagons from
+  hexagons — use it; don't infer from vertex counts by hand if the API gives it.
+
+## Pentagons → pole caps
+We orient the globe so two pentagons sit near the poles, then tag pentagon faces
+`isPoleCap=true`. Sim logic skips pole caps, so every **active** tile is a hexagon
+with exactly 6 neighbors. This sidesteps "what does a 5-neighbor tile do" entirely.
+If a future feature needs the pentagons active, that's an Open Question — ask.
+
+## Adjacency & distance (HexGrid)
+- Build adjacency once from shared edges of the mesh faces: two faces are
+  neighbors iff they share an edge. Store as `tileId -> tileId[]`.
+- Hex distance = BFS over that adjacency graph (no analytic axial coords on a
+  sphere — the graph is the source of truth). Cache distances from each capital;
+  recompute when a capital moves.
+
+## Gotchas
+- Hexagons next to pentagons are slightly irregular — fine for sim (adjacency is
+  topological, not metric) and visually unnoticeable at higher tessellation.
+- Keep ONE authoritative `faceIndex ↔ tileId` map shared by render + picking.

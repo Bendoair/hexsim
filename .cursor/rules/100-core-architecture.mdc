@@ -1,0 +1,35 @@
+---
+description: Layering and architecture rules for the simulation core
+globs: src/core/**/*.ts,src/sim/**/*.ts,src/config/**/*.ts
+---
+# Core & Sim layering
+
+These layers are the **engine-agnostic** heart of the project. They must run
+headless (Node/Vitest) with no browser.
+
+## Hard rules
+- **No Babylon.js, no DOM, no `window`/`document`** imports anywhere under
+  `core/`, `sim/`, `config/`. If you need geometry data, it is passed in as
+  plain numbers/arrays by the render layer, not imported.
+- `core/` = data + topology (World, HexGrid, Tile, Kingdom, terrain, features).
+  Pure, no time concept.
+- `sim/` = dynamics over time. Owns the tick loop, the double buffer, the seeded
+  RNG, and the `rules/`.
+- `config/SimConfig` = a plain serializable object. No logic, no imports.
+
+## Double buffering (the cardinal rule)
+`Simulation.step()` reads from the current buffer and writes a fresh next buffer,
+then swaps. A rule's `apply` receives `readState` (immutable this tick) and
+`writeState` (the one to mutate). Never read your own writes within a tick.
+
+## Rules
+- Each rule is its own file in `sim/rules/`, implementing the `Rule` interface:
+  `apply(tile, readState, writeState, grid, config, rng)`.
+- Rules run in the fixed order documented in PROJECT.md §4. Don't reorder without
+  updating the doc.
+- Determinism: all randomness flows through the injected seeded `rng`. Never call
+  `Math.random()` directly.
+
+## Tests
+Any change here needs a Vitest unit test. Sim behavior is verified headless by
+stepping N ticks and asserting on state — not by looking at the render.
