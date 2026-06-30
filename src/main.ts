@@ -9,8 +9,9 @@
 import { createScene } from "./render/SceneSetup";
 import { createGlobeMesh } from "./render/GlobeMesh";
 import { createPicker } from "./render/Picker";
-import { ColorBuffer, applyWorldColors, applyPointsColors } from "./render/colorBuffer";
+import { ColorBuffer, applyWorldColors, applyPointsColors, applyTerrainColors } from "./render/colorBuffer";
 import { TileOverlays } from "./render/TileOverlays";
+import { KingdomBorders } from "./render/KingdomBorders";
 import { HexGrid } from "./core/HexGrid";
 import { World } from "./core/World";
 import { Simulation } from "./sim/Simulation";
@@ -33,10 +34,12 @@ const { scene } = createScene(canvas);
 const globe = createGlobeMesh(scene);
 const colors = new ColorBuffer(globe.mesh, globe.topology.faceCount);
 const overlays = new TileOverlays(scene, globe.mesh);
+const borders = new KingdomBorders(scene, globe.mesh);
 
 let world = new World(new HexGrid(globe.topology), DEFAULT_CONFIG);
 let sim = new Simulation(world, buildRules());
 let view: ViewMode = "owners";
+let bordersVisible = false;
 
 function buildRules() {
   return [accumulationRule, hostilityRule, createSpreadRule(), mutationRule];
@@ -45,6 +48,8 @@ function buildRules() {
 function recolor(): void {
   if (view === "points") {
     applyPointsColors(world, colors);
+  } else if (view === "terrain") {
+    applyTerrainColors(world, colors);
   } else {
     applyWorldColors(world, colors);
   }
@@ -52,6 +57,12 @@ function recolor(): void {
 
 function rebuildOverlays(): void {
   overlays.rebuild(world);
+}
+
+function refreshBorders(): void {
+  if (bordersVisible) {
+    borders.rebuild(world);
+  }
 }
 
 let ticker: number | null = null;
@@ -62,6 +73,7 @@ function startTicking(): void {
   ticker = window.setInterval(() => {
     sim.step();
     recolor();
+    refreshBorders();
     hud.setTick(sim.tick);
   }, SIM_TICK_MS);
 }
@@ -77,19 +89,29 @@ const hud = new HUD({
   onStep: () => {
     sim.step();
     recolor();
+    refreshBorders();
     hud.setTick(sim.tick);
   },
   onReset: () => {
     stopTicking();
     sim.reset();
     recolor();
+    refreshBorders();
     hud.setTick(sim.tick);
   },
-  onToggleView: (next) => {
+  onSelectView: (next) => {
     view = next;
     recolor();
   },
   onToggleOverlay: (visible) => overlays.setVisible(visible),
+  onToggleBorders: (visible) => {
+    bordersVisible = visible;
+    if (visible) {
+      borders.rebuild(world);
+    } else {
+      borders.dispose();
+    }
+  },
 });
 
 new ControlPanel(DEFAULT_CONFIG, {
@@ -99,6 +121,7 @@ new ControlPanel(DEFAULT_CONFIG, {
     sim = new Simulation(world, buildRules());
     recolor();
     rebuildOverlays();
+    refreshBorders();
     hud.setTick(sim.tick);
   },
 });
@@ -110,6 +133,7 @@ createPicker(scene, globe, {
       console.info(`Capital #${result.kingdom.id} founded on tile ${tileId}.`);
       recolor();
       rebuildOverlays();
+      refreshBorders();
       return;
     }
     // Clicking an already-owned tile founds a settlement there instead.
@@ -123,6 +147,7 @@ createPicker(scene, globe, {
       if (settlement.ok) {
         recolor();
         rebuildOverlays();
+        refreshBorders();
       }
       return;
     }
