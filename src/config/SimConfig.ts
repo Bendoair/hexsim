@@ -11,6 +11,28 @@ export interface SimConfig {
   /** Seed for the deterministic RNG. Same seed + same inputs => same run. */
   seed: number;
 
+  // --- Capitals -----------------------------------------------------------
+  /** Maximum number of capitals/kingdoms a user may place (Open Q#3: capped). */
+  maxCapitals: number;       // suggested 8,    range 1–24
+
+  // --- World generation (terrain layout) ----------------------------------
+  world: {
+    /** Fraction of non-pole tiles that become sea. */
+    seaFraction: number;     // suggested 0.5,  range 0–0.9
+    /** Number of ocean "seeds" grown into continents/oceans. More = choppier. */
+    oceanSeeds: number;      // suggested 6,    range 1–30
+    /** Fraction of LAND tiles seeded as farmland (high gain). */
+    farmlandFraction: number; // suggested 0.15, range 0–0.6
+    /** Fraction of LAND tiles seeded as mountain (low gain). */
+    mountainFraction: number; // suggested 0.12, range 0–0.6
+    /** Probability a coastal land tile becomes a river (small gain bonus). */
+    riverChance: number;      // suggested 0.35, range 0–1
+  };
+
+  // --- Features -----------------------------------------------------------
+  /** Flat extra points/tick a Settlement adds to its tile (secondary source). */
+  settlementBonus: number;   // suggested 0.6,  range 0–5
+
   // --- Accumulation -------------------------------------------------------
   /** Points a tile gains per tick before modifiers. */
   baseGain: number;          // suggested 1.0,  range 0–5
@@ -47,6 +69,15 @@ export interface SimConfig {
 
 export const DEFAULT_CONFIG: SimConfig = {
   seed: 1,
+  maxCapitals: 8,
+  world: {
+    seaFraction: 0.5,
+    oceanSeeds: 6,
+    farmlandFraction: 0.15,
+    mountainFraction: 0.12,
+    riverChance: 0.35,
+  },
+  settlementBonus: 0.6,
   baseGain: 1.0,
   distanceK: 0.35,
   hostilityCost: 0.4,

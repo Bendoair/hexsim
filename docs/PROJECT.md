@@ -26,17 +26,14 @@ fast iteration on rules**, not for production hardening.
 | Language | **TypeScript**, strict mode | |
 | Build tool | **Vite** | Fast HMR, matches iteration goal. |
 
-## 3. Open questions (ASK the human before assuming)
+## 3. Open questions — RESOLVED (decided with the human, 2026-06-30)
 
-These are **not yet decided**. Do not silently pick one — surface the question.
-
-1. **Spread conflict resolution**: when two tiles target the same neutral tile in
-   one tick, does it resolve simultaneously (both may grab, last-write-wins) or
-   by contest (higher-points tile wins)? Default stub: contest, but flag it.
-2. **Sea**: hard wall (not a neighbor for spread) or passable with zero gain?
-   Default stub: hard wall, but flag it.
-3. **Capital count / placement**: fixed N at start, or user adds any number any
-   time? Default stub: user clicks to add, no cap.
+1. **Spread conflict resolution**: **Contest** — when two tiles target the same
+   neutral tile in one tick, the higher-points attacker wins.
+2. **Sea**: **Hard wall** — sea is not a spreadable neighbor and blocks hex
+   distance (kingdoms cannot cross or own it).
+3. **Capital count / placement**: **User clicks to add, capped** at
+   `SimConfig.maxCapitals`.
 
 ## 4. The ruleset (per owned tile, per tick)
 
@@ -97,9 +94,12 @@ Simulation { step(), rules: Rule[], rng }   // double-buffered
 Renderer    { globe mesh, pickFace(), camera, lights, syncColors(world) }
 ```
 
-`Rule` is an interface: `apply(tile, readState, writeState, grid, config, rng)`.
-Adding farmland or a new behavior = add a TerrainType/Feature/Rule + a config
-entry. No structural change. That is the whole point of the design.
+`Rule` is an interface: `apply(tileId, readState, writeState, ctx)`, where `ctx`
+(RuleContext) bundles `grid`, `world`, `config`, `rng` plus a cached
+`distanceToCapital()` (the accumulation falloff needs kingdom + distance, which a
+bare grid cannot provide). Adding farmland or a new behavior = add a
+TerrainType/Feature/Rule + a config entry. No structural change. That is the
+whole point of the design.
 
 ## 7. Build order (each step independently runnable & verifiable)
 
