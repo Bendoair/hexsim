@@ -25,7 +25,8 @@
   },
   "homepage": "https://github.com/Bendoair/hexsim#readme",
   "dependencies": {
-    "@babylonjs/core": "^9.14.0"
+    "@babylonjs/core": "^9.14.0",
+    "lucide-static": "^1.22.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

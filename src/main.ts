@@ -10,6 +10,7 @@ import { createScene } from "./render/SceneSetup";
 import { createGlobeMesh } from "./render/GlobeMesh";
 import { createPicker } from "./render/Picker";
 import { ColorBuffer, applyWorldColors, applyPointsColors } from "./render/colorBuffer";
+import { TileOverlays } from "./render/TileOverlays";
 import { HexGrid } from "./core/HexGrid";
 import { World } from "./core/World";
 import { Simulation } from "./sim/Simulation";
@@ -31,6 +32,7 @@ if (!(canvas instanceof HTMLCanvasElement)) {
 const { scene } = createScene(canvas);
 const globe = createGlobeMesh(scene);
 const colors = new ColorBuffer(globe.mesh, globe.topology.faceCount);
+const overlays = new TileOverlays(scene, globe.mesh);
 
 let world = new World(new HexGrid(globe.topology), DEFAULT_CONFIG);
 let sim = new Simulation(world, buildRules());
@@ -46,6 +48,10 @@ function recolor(): void {
   } else {
     applyWorldColors(world, colors);
   }
+}
+
+function rebuildOverlays(): void {
+  overlays.rebuild(world);
 }
 
 let ticker: number | null = null;
@@ -83,6 +89,7 @@ const hud = new HUD({
     view = next;
     recolor();
   },
+  onToggleOverlay: (visible) => overlays.setVisible(visible),
 });
 
 new ControlPanel(DEFAULT_CONFIG, {
@@ -91,6 +98,7 @@ new ControlPanel(DEFAULT_CONFIG, {
     world = new World(new HexGrid(globe.topology), DEFAULT_CONFIG);
     sim = new Simulation(world, buildRules());
     recolor();
+    rebuildOverlays();
     hud.setTick(sim.tick);
   },
 });
@@ -101,6 +109,7 @@ createPicker(scene, globe, {
     if (result.ok) {
       console.info(`Capital #${result.kingdom.id} founded on tile ${tileId}.`);
       recolor();
+      rebuildOverlays();
       return;
     }
     // Clicking an already-owned tile founds a settlement there instead.
@@ -113,6 +122,7 @@ createPicker(scene, globe, {
       );
       if (settlement.ok) {
         recolor();
+        rebuildOverlays();
       }
       return;
     }
@@ -121,6 +131,7 @@ createPicker(scene, globe, {
 });
 
 recolor();
+rebuildOverlays();
 console.info(
   `Globe ready: ${world.grid.tileCount} tiles. Click LAND for a capital ` +
     `(max ${DEFAULT_CONFIG.maxCapitals}); click your own tile for a settlement. ` +

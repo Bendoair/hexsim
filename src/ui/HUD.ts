@@ -5,6 +5,7 @@ export interface HudCallbacks {
   onStep: () => void;
   onReset: () => void;
   onToggleView: (view: ViewMode) => void;
+  onToggleOverlay: (visible: boolean) => void;
 }
 
 /**
@@ -17,9 +18,11 @@ export class HUD {
   private readonly playBtn: HTMLButtonElement;
   private readonly stepBtn: HTMLButtonElement;
   private readonly viewBtn: HTMLButtonElement;
+  private readonly overlayBtn: HTMLButtonElement;
   private readonly tickLabel: HTMLSpanElement;
   private playing = false;
   private view: ViewMode = "owners";
+  private overlayVisible = true;
 
   constructor(callbacks: HudCallbacks) {
     this.root = document.createElement("div");
@@ -56,12 +59,17 @@ export class HUD {
       this.viewBtn.textContent = `View: ${this.view}`;
       callbacks.onToggleView(this.view);
     });
+    this.overlayBtn = this.makeButton("Icons: on", () => {
+      this.overlayVisible = !this.overlayVisible;
+      this.overlayBtn.textContent = `Icons: ${this.overlayVisible ? "on" : "off"}`;
+      callbacks.onToggleOverlay(this.overlayVisible);
+    });
 
     this.tickLabel = document.createElement("span");
     this.tickLabel.style.cssText = "margin-left:4px;font-variant-numeric:tabular-nums;opacity:0.85";
     this.setTick(0);
 
-    this.root.append(this.playBtn, this.stepBtn, resetBtn, this.viewBtn, this.tickLabel);
+    this.root.append(this.playBtn, this.stepBtn, resetBtn, this.viewBtn, this.overlayBtn, this.tickLabel);
     document.body.appendChild(this.root);
   }
 
