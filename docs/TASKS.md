@@ -57,3 +57,5 @@ verified. If a task reveals an Open Question (PROJECT.md §3), stop and ask.
 - [x] `RiverTerrain` — decided with the human to implement TILE-BASED (passable land with the river gain mod, seeded along coasts) rather than edge-based; no adjacency change. Config `world.riverChance` + slider.
 - [x] `Settlement` feature (secondary gain source; flat accumulation bonus) + slider + left-click placement on owned tiles.
 - [x] Each extra: new class + config entry + slider, **no** structural change.
+- [x] **Border exchange** — bulk frontier deals between kingdom pairs; hostility
+  defaults 0; exchange tunables + HUD event popup with on/off toggle.

@@ -177,6 +177,72 @@ export class ControlPanel {
       set: (v) => (config.newTileSeedPoints = v),
     });
 
+    this.addHeading("Border exchange");
+    this.addSlider(callbacks, {
+      label: "frontier sum threshold",
+      min: 10,
+      max: 200,
+      step: 1,
+      get: () => config.exchangeFrontierSumThreshold,
+      set: (v) => (config.exchangeFrontierSumThreshold = v),
+    });
+    this.addSlider(callbacks, {
+      label: "exchange min tiles",
+      min: 1,
+      max: 5,
+      step: 1,
+      get: () => config.exchangeMinTiles,
+      set: (v) => (config.exchangeMinTiles = v),
+    });
+    this.addSlider(callbacks, {
+      label: "exchange max tiles",
+      min: 2,
+      max: 10,
+      step: 1,
+      get: () => config.exchangeMaxTiles,
+      set: (v) => (config.exchangeMaxTiles = v),
+    });
+    this.addSlider(callbacks, {
+      label: "forced ratio",
+      min: 1.2,
+      max: 5,
+      step: 0.1,
+      get: () => config.exchangeForcedRatio,
+      set: (v) => (config.exchangeForcedRatio = v),
+    });
+    this.addSlider(callbacks, {
+      label: "one-way ratio",
+      min: 1,
+      max: 3,
+      step: 0.1,
+      get: () => config.exchangeOneWayRatio,
+      set: (v) => (config.exchangeOneWayRatio = v),
+    });
+    this.addSlider(callbacks, {
+      label: "base accept chance",
+      min: 0,
+      max: 1,
+      step: 0.01,
+      get: () => config.exchangeBaseAcceptChance,
+      set: (v) => (config.exchangeBaseAcceptChance = v),
+    });
+    this.addSlider(callbacks, {
+      label: "advantage slope",
+      min: 0,
+      max: 1,
+      step: 0.01,
+      get: () => config.exchangeAdvantageSlope,
+      set: (v) => (config.exchangeAdvantageSlope = v),
+    });
+    this.addSlider(callbacks, {
+      label: "exchange point cost",
+      min: 0,
+      max: 50,
+      step: 1,
+      get: () => config.exchangePointCost,
+      set: (v) => (config.exchangePointCost = v),
+    });
+
     this.addHeading("Mutation");
     this.addSlider(callbacks, {
       label: "mutation chance",

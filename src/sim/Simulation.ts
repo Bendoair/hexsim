@@ -3,6 +3,7 @@ import type { HexGrid } from "../core/HexGrid";
 import { createRng, type Rng } from "../core/rng";
 import { NO_OWNER, cloneState, createState, type SimState } from "./SimState";
 import type { Rule, RuleContext } from "./Rule";
+import type { SimEvent } from "./SimEvent";
 
 /**
  * Caches BFS distances from each capital tile. Distances depend only on terrain
@@ -38,11 +39,14 @@ class DistanceCache {
  */
 export class Simulation {
   tick = 0;
+  /** Events recorded during the most recent step (read-only snapshot). */
+  events: ReadonlyArray<SimEvent> = [];
   private readonly world: World;
   private readonly grid: HexGrid;
   private readonly rules: ReadonlyArray<Rule>;
   private readonly distances: DistanceCache;
   private rng: Rng;
+  private readonly eventsBuffer: SimEvent[] = [];
   private readonly ctx: RuleContext;
 
   constructor(world: World, rules: ReadonlyArray<Rule>) {
@@ -51,17 +55,25 @@ export class Simulation {
     this.rules = rules;
     this.distances = new DistanceCache(this.grid);
     this.rng = createRng(world.config.seed);
+    const self = this;
     this.ctx = {
       grid: this.grid,
       world: this.world,
       config: this.world.config,
       rng: { next: () => this.rng.next(), int: (m) => this.rng.int(m) },
+      get tick() {
+        return self.tick;
+      },
       distanceToCapital: (tileId, capitalTileId) => this.distances.to(tileId, capitalTileId),
+      recordEvent: (event) => {
+        self.eventsBuffer.push(event);
+      },
     };
   }
 
   /** Advance exactly one discrete tick. */
   step(): void {
+    this.eventsBuffer.length = 0;
     const read = this.readFromTiles();
     const write = cloneState(read);
 
@@ -73,6 +85,7 @@ export class Simulation {
     }
 
     this.commit(write);
+    this.events = [...this.eventsBuffer];
     this.tick += 1;
   }
 
@@ -82,6 +95,8 @@ export class Simulation {
       tile.points = 0;
     }
     this.tick = 0;
+    this.events = [];
+    this.eventsBuffer.length = 0;
     this.rng = createRng(this.world.config.seed);
   }
 

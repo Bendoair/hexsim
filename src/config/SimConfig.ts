@@ -56,6 +56,24 @@ export interface SimConfig {
   /** Points a freshly converted tile starts with. */
   newTileSeedPoints: number; // suggested 1,    range 0–20
 
+  // --- Border exchange ----------------------------------------------------
+  /** Min combined frontier points (both sides) to trigger a bulk border deal. */
+  exchangeFrontierSumThreshold: number; // suggested 50,  range 10–200
+  /** Minimum tiles the proposer gains in an exchange. */
+  exchangeMinTiles: number;             // suggested 2,   range 1–5
+  /** Maximum tiles the proposer gains in an exchange. */
+  exchangeMaxTiles: number;             // suggested 5,   range 2–10
+  /** Frontier-sum ratio above which the receiver cannot reject the offer. */
+  exchangeForcedRatio: number;          // suggested 2.5, range 1.2–5
+  /** Frontier-sum ratio above which the counterparty gains zero tiles (one-way). */
+  exchangeOneWayRatio: number;          // suggested 1.8, range 1–3
+  /** Accept chance when frontier sums are even (before advantage slope). */
+  exchangeBaseAcceptChance: number;   // suggested 0.35, range 0–1
+  /** Extra accept chance per unit of advantage above parity. */
+  exchangeAdvantageSlope: number;       // suggested 0.25, range 0–1
+  /** Points deducted from proposer frontier on a successful exchange. */
+  exchangePointCost: number;          // suggested 6,   range 0–50
+
   // --- Mutation -----------------------------------------------------------
   /** Per-tile, per-tick probability of a small random event. 0 = borders freeze. */
   mutationChance: number;    // suggested 0.002, range 0–0.1
@@ -84,11 +102,19 @@ export const DEFAULT_CONFIG: SimConfig = {
   settlementBonus: 0.6,
   baseGain: 1.0,
   distanceK: 0.35,
-  hostilityCost: 0.4,
-  maxHostility: 1.5,
+  hostilityCost: 0,
+  maxHostility: 0,
   spreadThreshold: 10,
   spreadCost: 6,
   newTileSeedPoints: 1,
+  exchangeFrontierSumThreshold: 50,
+  exchangeMinTiles: 2,
+  exchangeMaxTiles: 5,
+  exchangeForcedRatio: 2.5,
+  exchangeOneWayRatio: 1.8,
+  exchangeBaseAcceptChance: 0.35,
+  exchangeAdvantageSlope: 0.25,
+  exchangePointCost: 6,
   mutationChance: 0.002,
   terrain: { grass: 1.0, farmland: 1.6, mountain: 0.5, sea: 0.0, river: 1.1 },
 };

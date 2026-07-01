@@ -7,6 +7,7 @@ export interface HudCallbacks {
   onSelectView: (view: ViewMode) => void;
   onToggleOverlay: (visible: boolean) => void;
   onToggleBorders: (visible: boolean) => void;
+  onTogglePopups: (visible: boolean) => void;
 }
 
 const VIEW_OPTIONS: ReadonlyArray<{ id: ViewMode; label: string }> = [
@@ -28,10 +29,12 @@ export class HUD {
   private readonly viewButtons = new Map<ViewMode, HTMLButtonElement>();
   private readonly overlayBtn: HTMLButtonElement;
   private readonly bordersBtn: HTMLButtonElement;
+  private readonly popupsBtn: HTMLButtonElement;
   private playing = false;
   private view: ViewMode = "owners";
   private overlayVisible = true;
   private bordersVisible = false;
+  private popupsVisible = true;
 
   constructor(callbacks: HudCallbacks) {
     this.root = document.createElement("div");
@@ -101,7 +104,12 @@ export class HUD {
       this.bordersBtn.textContent = `Borders: ${this.bordersVisible ? "on" : "off"}`;
       callbacks.onToggleBorders(this.bordersVisible);
     });
-    views.append(this.overlayBtn, this.bordersBtn);
+    this.popupsBtn = this.makeButton("Popups: on", () => {
+      this.popupsVisible = !this.popupsVisible;
+      this.popupsBtn.textContent = `Popups: ${this.popupsVisible ? "on" : "off"}`;
+      callbacks.onTogglePopups(this.popupsVisible);
+    });
+    views.append(this.overlayBtn, this.bordersBtn, this.popupsBtn);
 
     this.root.append(controls, views);
     document.body.appendChild(this.root);

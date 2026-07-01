@@ -42,15 +42,24 @@ Order matters. Apply in this sequence, all reading from the *previous* buffer:
 1. **Accumulation** — `points += base_gain * terrainMod * distanceFalloff`
    where `distanceFalloff = 1 / (1 + k * hexDistanceToCapital)`.
 2. **Hostility drain** — for each neighbor owned by a *different* kingdom,
-   `points -= hostility_cost`, total drain capped at `max_hostility`.
+   `points -= hostility_cost`, total drain capped at `max_hostility`. Defaults
+   are **0** (disabled); raise via sliders to starve contested frontiers.
 3. **Spread** — if `points >= spread_threshold`, convert one eligible neighbor
    (unowned, or enemy with low points); spend `spread_cost`; new tile starts low.
-4. **Mutation** — each tile rolls `mutation_chance` to do a random small event
+4. **Border exchange** — per adjacent kingdom pair, when combined frontier-tile
+   points exceed `exchangeFrontierSumThreshold`, the stronger side proposes a
+   bulk deal: **X tiles for proposer, Y for receiver** (Y may be 0). Huge
+   frontier advantage forces acceptance; moderate advantage rolls
+   `exchangeBaseAcceptChance`. Transfers 2–5 connected tiles per side.
+5. **Mutation** — each tile rolls `mutation_chance` to do a random small event
    (flip allegiance, point burst, later: terrain change).
 
-Equilibrium emerges because distance falloff + hostility drain make far frontier
-tiles unable to clear `spread_threshold`. Mutation keeps borders from freezing
-solid. The key dial is the **`spread_cost : base_gain` ratio**.
+Equilibrium emerges from distance falloff + spread cost + bulk border exchange
+(rather than hostility drain, which defaults off). Mutation keeps borders from
+freezing solid. Key dials: **`spread_cost : base_gain`** and exchange thresholds.
+
+Successful border exchanges emit a `BorderExchangeEvent` on `Simulation.events`
+for the UI popup.
 
 Every constant above lives in `SimConfig` (see §6) and is bound to a UI slider.
 

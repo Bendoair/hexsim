@@ -18,10 +18,12 @@ import { Simulation } from "./sim/Simulation";
 import { accumulationRule } from "./sim/rules/accumulation";
 import { hostilityRule } from "./sim/rules/hostility";
 import { createSpreadRule } from "./sim/rules/spread";
+import { createBorderExchangeRule } from "./sim/rules/borderExchange";
 import { mutationRule } from "./sim/rules/mutation";
 import { capitalFloorRule } from "./sim/rules/capitalFloor";
 import { HUD, type ViewMode } from "./ui/HUD";
 import { ControlPanel } from "./ui/ControlPanel";
+import { ExchangeEventPopup } from "./ui/ExchangeEventPopup";
 import { DEFAULT_CONFIG } from "./config/SimConfig";
 
 const SIM_TICK_MS = 150;
@@ -43,7 +45,22 @@ let view: ViewMode = "owners";
 let bordersVisible = false;
 
 function buildRules() {
-  return [accumulationRule, hostilityRule, createSpreadRule(), mutationRule, capitalFloorRule];
+  return [
+    accumulationRule,
+    hostilityRule,
+    createSpreadRule(),
+    createBorderExchangeRule(),
+    mutationRule,
+    capitalFloorRule,
+  ];
+}
+
+function drainExchangeEvents(simulation: Simulation): void {
+  for (const event of simulation.events) {
+    if (event.kind === "borderExchange") {
+      exchangePopup.show(event, world);
+    }
+  }
 }
 
 function recolor(): void {
@@ -66,6 +83,8 @@ function refreshBorders(): void {
   }
 }
 
+const exchangePopup = new ExchangeEventPopup();
+
 let ticker: number | null = null;
 function startTicking(): void {
   if (ticker !== null) {
@@ -73,6 +92,7 @@ function startTicking(): void {
   }
   ticker = window.setInterval(() => {
     sim.step();
+    drainExchangeEvents(sim);
     recolor();
     refreshBorders();
     hud.setTick(sim.tick);
@@ -89,6 +109,7 @@ const hud = new HUD({
   onPlayPause: (playing) => (playing ? startTicking() : stopTicking()),
   onStep: () => {
     sim.step();
+    drainExchangeEvents(sim);
     recolor();
     refreshBorders();
     hud.setTick(sim.tick);
@@ -112,6 +133,9 @@ const hud = new HUD({
     } else {
       borders.dispose();
     }
+  },
+  onTogglePopups: (visible) => {
+    exchangePopup.setEnabled(visible);
   },
 });
 

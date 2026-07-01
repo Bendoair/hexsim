@@ -2,6 +2,7 @@ import type { SimConfig } from "../config/SimConfig";
 import type { HexGrid } from "../core/HexGrid";
 import type { World } from "../core/World";
 import type { Rng } from "../core/rng";
+import type { SimEvent } from "./SimEvent";
 import type { SimState } from "./SimState";
 
 /**
@@ -15,8 +16,11 @@ export interface RuleContext {
   readonly world: World;
   readonly config: SimConfig;
   readonly rng: Rng;
+  readonly tick: number;
   /** Cached hex distance from a tile to a capital tile (-1 if unreachable). */
   distanceToCapital(tileId: number, capitalTileId: number): number;
+  /** Record a sim event for the UI (e.g. border exchange popup). */
+  recordEvent(event: SimEvent): void;
 }
 
 /**

@@ -19,8 +19,12 @@ function lineTopology(n: number): GlobeTopology {
   return { faceCount: n, adjacency, isPentagon: new Array<boolean>(n).fill(false) };
 }
 
-function lineWorld(n: number): World {
-  const config: SimConfig = { ...DEFAULT_CONFIG, world: { ...DEFAULT_CONFIG.world, seaFraction: 0 } };
+function lineWorld(n: number, configOverrides: Partial<SimConfig> = {}): World {
+  const config: SimConfig = {
+    ...DEFAULT_CONFIG,
+    ...configOverrides,
+    world: { ...DEFAULT_CONFIG.world, seaFraction: 0, ...configOverrides.world },
+  };
   return new World(new HexGrid(lineTopology(n)), config);
 }
 
@@ -69,7 +73,7 @@ describe("spread + hostility", () => {
   });
 
   it("two adjacent kingdoms grow then settle on a stable border", () => {
-    const world = lineWorld(21);
+    const world = lineWorld(21, { hostilityCost: 0.4, maxHostility: 1.5, mutationChance: 0 });
     world.addCapital(0);
     world.addCapital(20);
     const sim = makeSim(world);
